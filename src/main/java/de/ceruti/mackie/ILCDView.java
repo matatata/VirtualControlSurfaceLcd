@@ -11,9 +11,6 @@ public interface ILCDView {
 	}
 	
 	
-	boolean isUndecorated();
-	void setUndecorated(boolean undecorated);
-		
 	
 	void updateDisplayData(int lcdPos, byte[] data, int offset, int n);
 

@@ -30,7 +30,6 @@ public class MackieLCDController extends NSObjectImpl implements Nofitications {
 	private static final String SPACING_KEY = "spacingKey";
 	private static final String OPACITY_KEY = "opacityKey";
 	private static final String ANTIALIASED_PREF_KEY = "antialiasedPrefKey";
-	private static final String UNDECORATED_PREF_KEY = "undecoratedPrefKey";
 	private static final String ALWAYS_ON_TOP_PREF_KEY = "alwaysOnTopPrefKey";
 	private static final String NOPORT = "-";
 	private static final String VirtualPortIN = "MackieLCD in";
@@ -155,7 +154,7 @@ public class MackieLCDController extends NSObjectImpl implements Nofitications {
 		
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
 		
-		lcdView = new MackieLCDWindow(this,"Mackie View",Color.white,Color.blue,0.75f,null,false,true);
+		lcdView = new MackieLCDWindow(this,"Mackie View",Color.white,Color.blue,0.75f,null,false);
 		
 
 		mackieView = new MackieLCD(){
@@ -280,8 +279,6 @@ public class MackieLCDController extends NSObjectImpl implements Nofitications {
 		
 		
 		lcdView.setAlwaysOnTop(prefs.getBoolean(ALWAYS_ON_TOP_PREF_KEY, true));
-		lcdView.setUndecorated(prefs.getBoolean(UNDECORATED_PREF_KEY, true));
-		lcdView.setUndecorated(true);//must be true
 		lcdView.setAntialiased(prefs.getBoolean(ANTIALIASED_PREF_KEY, true));
 		lcdView.setAlpha(prefs.getFloat(OPACITY_KEY, 0.75f));
 		lcdView.setInterChanWeight(prefs.getFloat(SPACING_KEY, 0.0f));
@@ -294,7 +291,6 @@ public class MackieLCDController extends NSObjectImpl implements Nofitications {
 	
 	@Override
 	public void exit(ILCDView jFrameLCDView) {
-//		writeSettings();
 		System.exit(0);
 	}
 	
@@ -315,7 +311,6 @@ public class MackieLCDController extends NSObjectImpl implements Nofitications {
 		prefs.putInt("w",lcdView.getBounds().width);
 		
 		prefs.putBoolean(ALWAYS_ON_TOP_PREF_KEY, lcdView.isAlwaysOnTop());
-		prefs.putBoolean(UNDECORATED_PREF_KEY, lcdView.isUndecorated());
 		prefs.putBoolean(ANTIALIASED_PREF_KEY, lcdView.isAntialiased());
 		prefs.putFloat(OPACITY_KEY, lcdView.getAlpha());
 		prefs.putFloat(SPACING_KEY, lcdView.getInterChanWeight());
@@ -324,12 +319,10 @@ public class MackieLCDController extends NSObjectImpl implements Nofitications {
 		prefs.putInt(FOREGROUND_KEY, lcdView.getForeground().getRGB());
 		prefs.putInt(BACKGROUND_KEY, lcdView.getBackground().getRGB());
 		
-		System.out.println(prefs.absolutePath());
 		
 		try {
 			prefs.flush();
 		} catch (BackingStoreException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

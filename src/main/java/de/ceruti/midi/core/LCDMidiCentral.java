@@ -25,8 +25,9 @@ public class LCDMidiCentral implements MidiSystemListener, IMidiCentral {
 //				
 		 //
 //		 try {
-//		 de.humatic.mmj.MidiSystem.enableActiveSensing(sendActiveSensing);
+//			 de.humatic.mmj.MidiSystem.enableActiveSensing(sendActiveSensing);
 //		 } catch (Exception e) {
+//			 e.printStackTrace(System.err);
 //		 }
 
 		de.humatic.mmj.MidiSystem.initMidiSystem(virtualSource, virtualDestination);

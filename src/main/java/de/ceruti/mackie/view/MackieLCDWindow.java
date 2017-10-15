@@ -63,7 +63,6 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 	private Color background = Color.blue, foreground = Color.white;
 	private String title;
 	private float alpha = 1.0f;
-	private boolean undecorated = false;
 	private Rectangle bounds;
 	
 	private int lines = 2;
@@ -126,28 +125,17 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 				handler.drawChar(mainRenderer,c);
 			if(Character.isDefined(c))
 				mainRenderer.draw3D(String.valueOf(c), (float)(curs + marginX + (interCharacterSpace+charWidth)*(float)i), (float) (baseY - lineSpacing()*row), (float)0.0f,scale);
-			else {
-				System.err.println("undefined " + c);
-			}
 		}
 	}
 	
 	public void display(GLAutoDrawable gLDrawable) {
-		
-		System.out.println("display");
-		
 		final GL2 gl = gLDrawable.getGL().getGL2();
 		glClearColor(gl,getBackground());
 		gl.glClear(GL.GL_COLOR_BUFFER_BIT);
 		
-		 
-		
-		String s = new String(displayData,0,bytesPerRow);
-		String s2 = new String(displayData,bytesPerRow,bytesPerRow);
-		
-		
-		
-		
+		String line1 = new String(displayData,0,bytesPerRow);
+		String line2 = new String(displayData,bytesPerRow,bytesPerRow);
+
 		int y = gLDrawable.getSurfaceHeight() - (int)fontSize() - marginV;
 		
 		mainRenderer.begin3DRendering();
@@ -155,10 +143,9 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 		mainRenderer.setColor(getForeground());
 		
 		bytesPerRowF = this.bytesPerRow;
-
 		
-		drawLine(s, mainRenderer, gLDrawable, 0,y,null);
-		drawLine(s2, mainRenderer, gLDrawable, 1,y,null);
+		drawLine(line1, mainRenderer, gLDrawable, 0,y,null);
+		drawLine(line2, mainRenderer, gLDrawable, 1,y,null);
 		
 		mainRenderer.end3DRendering();
 		
@@ -207,36 +194,7 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 	}
 
 	
-	public boolean isUndecorated() {
-		return undecorated;
-	}
 
-	@PostKVONotifications
-	public void setUndecorated(boolean undecorated) {
-		if(this.undecorated!=undecorated){
-			int oldh=canvas.getHeight();
-			
-			if(!undecorated){
-				setAlpha(1.0f);
-			}
-			
-			dispose();
-			this.undecorated = undecorated;
-			
-			init();
-			
-			
-			int diff=canvas.getHeight()-oldh;
-			
-			if(undecorated){
-				frame.setSize(frame.getWidth(), oldh);
-			}else{
-				frame.setSize(frame.getWidth(), oldh - diff);
-			}
-			frame.setLocation(frame.getLocation().x, frame.getLocation().y+diff);
-			
-		}
-	}
 
 
 
@@ -299,13 +257,9 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 
 	@PostKVONotifications
 	public void setAlpha(float a) {
-			this.alpha = a;
-		if(!this.undecorated){
-			this.alpha=1.0f;
-		}
-			frame.getRootPane().putClientProperty("Window.alpha", a);
-			redraw();
-//		}
+		this.alpha = a;
+		frame.getRootPane().putClientProperty("Window.alpha", a);
+		redraw();
 	}
 	
 	public float getAlpha() {
@@ -359,14 +313,13 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 	private final byte[] displayData = new byte[rows * bytesPerRow];
 	
 	
-	public MackieLCDWindow(Nofitications listener,String title,Color fg,Color bg, float alpha,Rectangle bounds, boolean onTop, boolean undecorated) {
+	public MackieLCDWindow(Nofitications listener,String title,Color fg,Color bg, float alpha,Rectangle bounds, boolean onTop) {
 		this.alpha=alpha;
 		this.title=title;
 		this.background=bg;
 		this.foreground=fg;
 		this.alwaysOnTop=onTop;
 		this.listener = listener;
-		this.undecorated = undecorated;
 		
 		System.setProperty("sun.awt.noerasebackground", "true");
 		 
@@ -429,7 +382,7 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 			frame.setBounds(oldBounds);
 		}
 		
-		frame.setUndecorated(isUndecorated());
+		frame.setUndecorated(true);
 		frame.setAlwaysOnTop(isAlwaysOnTop());
 		
 		
@@ -437,13 +390,8 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 		
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				displayTextTemporary("Close via context-menu 'Exit'", 1000);
 			}
 		});
-		
-
-		
-
 		
 		
 		frame.requestFocus();
@@ -454,12 +402,6 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 		
 		stickie.connect(frame,canvas);
 		
-//		String s  = "Audio1 Audio2 Audio3 Audio4 Audio5 Audio6 Audio7 Audio8 ";
-//		String s2 = "--     0db    --     Volume --     Pan    --     ------ ";
-//
-//		updateDisplayData(0, s.getBytes(), 0, s.length());
-//		updateDisplayData(bytesPerRow, s2.getBytes(), 0, s2.length());
-//		
 		
 		frame.setVisible(visible);
 	}
@@ -557,8 +499,6 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 
 
 	public void dispose(GLAutoDrawable arg0) {
-		// TODO Auto-generated method stub
-		System.out.println("dispose");
 	}
 	
 	
