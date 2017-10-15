@@ -1,0 +1,121 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>de.infomac.macbcfview</groupId>
+	<artifactId>macbcfview</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<properties>
+		<aspectj.version>1.8.10</aspectj.version>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
+		<java.source-target.version>1.6</java.source-target.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>curcuma</groupId>
+			<artifactId>CurcumaAppKit</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>curcuma</groupId>
+			<artifactId>CurcumaWidgetPlugIns</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jogamp.gluegen</groupId>
+			<artifactId>gluegen-rt-main</artifactId>
+			<version>2.0-rc11</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all-main</artifactId>
+			<!-- <version>2.0.2</version>-->
+			<version>2.0-rc11</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>4.1</version>
+		</dependency>
+
+
+
+		<dependency>
+			<groupId>de.humatic</groupId>
+			<artifactId>mmj</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/mmj.jar</systemPath>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>aspectj-maven-plugin</artifactId>
+				<configuration>
+					<aspectLibraries>
+						<aspectLibrary>
+							<groupId>curcuma</groupId>
+							<artifactId>CurcumaKeyValueCoding</artifactId>
+						</aspectLibrary>
+						<aspectLibrary>
+							<groupId>curcuma</groupId>
+							<artifactId>CurcumaKeyValueObserving</artifactId>
+						</aspectLibrary>
+						<aspectLibrary>
+							<groupId>curcuma</groupId>
+							<artifactId>CurcumaKeyValueBinding</artifactId>
+						</aspectLibrary>
+						<aspectLibrary>
+							<groupId>curcuma</groupId>
+							<artifactId>CurcumaFoundation</artifactId>
+						</aspectLibrary>
+						<aspectLibrary>
+							<groupId>curcuma</groupId>
+							<artifactId>CurcumaAppKit</artifactId>
+						</aspectLibrary>
+					</aspectLibraries>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>aspectj-maven-plugin</artifactId>
+				<version>1.9</version>
+				<configuration>
+					<!-- <showWeaveInfo>true</showWeaveInfo> -->
+					<source>${java.source-target.version}</source>
+					<target>${java.source-target.version}</target>
+					<Xlint>ignore</Xlint>
+					<complianceLevel>${java.source-target.version}</complianceLevel>
+					<encoding>${project.build.sourceEncoding}</encoding>
+					<!-- <verbose>true</verbose> -->
+					<!--<warn>constructorName,packageDefaultMethod,deprecation,maskedCatchBlocks,unusedLocals,unusedArguments,unusedImport</warn> -->
+				</configuration>
+				<executions>
+					<execution>
+						<!-- IMPORTANT -->
+						<phase>process-sources</phase>
+						<goals>
+							<goal>compile</goal>
+							<goal>test-compile</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.aspectj</groupId>
+						<artifactId>aspectjtools</artifactId>
+						<version>${aspectj.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+		</plugins>
+	</build>
+</project>
