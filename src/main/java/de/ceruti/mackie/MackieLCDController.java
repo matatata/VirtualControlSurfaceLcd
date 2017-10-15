@@ -227,20 +227,26 @@ public class MackieLCDController extends NSObjectImpl implements Nofitications {
 		
 		
 		
-		com.apple.eawt.Application a = com.apple.eawt.Application.getApplication();
+//		com.apple.eawt.Application a = com.apple.eawt.Application.getApplication();
+//		
+//		a.addApplicationListener(new com.apple.eawt.ApplicationAdapter(){
+//			@Override
+//			public void handleQuit(com.apple.eawt.ApplicationEvent arg0) {
+//				mackie.writeSettings();
+//				System.exit(0);
+//			}
+//			
+//			@Override
+//			public void handleAbout(com.apple.eawt.ApplicationEvent arg0) {
+//				super.handleAbout(arg0);
+//			}
+//		});
 		
-		a.addApplicationListener(new com.apple.eawt.ApplicationAdapter(){
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable(){
 			@Override
-			public void handleQuit(com.apple.eawt.ApplicationEvent arg0) {
+			public void run() {
 				mackie.writeSettings();
-				System.exit(0);
-			}
-			
-			@Override
-			public void handleAbout(com.apple.eawt.ApplicationEvent arg0) {
-				super.handleAbout(arg0);
-			}
-		});
+			}}));
 		
 	}
 
@@ -284,6 +290,12 @@ public class MackieLCDController extends NSObjectImpl implements Nofitications {
 		lcdView.setForeground(new Color(prefs.getInt(FOREGROUND_KEY, Color.white.getRGB())));
 		lcdView.setBackground(new Color(prefs.getInt(BACKGROUND_KEY, Color.blue.getRGB())));
 		
+	}
+	
+	@Override
+	public void exit(ILCDView jFrameLCDView) {
+//		writeSettings();
+		System.exit(0);
 	}
 	
 	public void writeSettings(){

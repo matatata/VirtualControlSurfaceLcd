@@ -12,19 +12,19 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.glu.GLU;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
-import javax.media.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.awt.TextRenderer;
 
 import de.ceruti.curcuma.api.appkit.view.cells.NSCell;
@@ -42,7 +42,6 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 	private GLU glu = new GLU();
 	private JFrame frame;
 	private TextRenderer mainRenderer;
-	private TextRenderer renderer2;
 
 	
 	
@@ -94,14 +93,14 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 	
 	private void calc(TextRenderer mainRenderer,GLAutoDrawable gLDrawable){
 		charWidth = mainRenderer.getCharWidth('x') * scale; //mono
-		spaceToDistribute = (gLDrawable.getWidth() -  (int)(bytesPerRowF*charWidth) - marginX*2);
+		spaceToDistribute = (gLDrawable.getSurfaceWidth() -  (int)(bytesPerRowF*charWidth) - marginX*2);
 		
 		//distribute
 		interCharacterSpace = spaceToDistribute*interCharWeight()/(bytesPerRowF - 1.0f);
 		interChannelSpace = spaceToDistribute*interChanWeight/7;
 		
 		
-		linespacing = (gLDrawable.getHeight() - lines*(int)(fontSize()) - 2*marginV) / (lines-1);
+		linespacing = (gLDrawable.getSurfaceHeight() - lines*(int)(fontSize()) - 2*marginV) / (lines-1);
 	}
 	
 	interface Handler {
@@ -110,34 +109,32 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 	
 	void drawLine(String s,TextRenderer mainRenderer,GLAutoDrawable gLDrawable,int row,int baseY,Handler handler){
 		calc(mainRenderer,gLDrawable);
-		
 		GL gl = gLDrawable.getGL();
 		gl.glDisable(GL.GL_DEPTH_TEST);
-		
 		gl.glEnable(GL.GL_CULL_FACE);
 		
-		//row1
 		float curs = 0.0f;
 		for(int i=0;i<s.length();i++){
 			char c = s.charAt(i);
+			if(c==0)
+				c=' ';
+			
 			float chSpace = (i%7)==0 && i>0 && i<bytesPerRow ? interChannelSpace : 0.0f;
 			curs = curs+chSpace;
 			
-			
-			
 			if(handler!=null)
 				handler.drawChar(mainRenderer,c);
-			
-//			mainRenderer.draw(String.valueOf(c), (int)(curs + marginX + (interCharacterSpace+charWidth)*(float)i), baseY - lineSpacing()*row);	
-			
-//			if(c>=0 && c <= 127)
+			if(Character.isDefined(c))
 				mainRenderer.draw3D(String.valueOf(c), (float)(curs + marginX + (interCharacterSpace+charWidth)*(float)i), (float) (baseY - lineSpacing()*row), (float)0.0f,scale);
-
+			else {
+				System.err.println("undefined " + c);
+			}
 		}
 	}
 	
 	public void display(GLAutoDrawable gLDrawable) {
 		
+		System.out.println("display");
 		
 		final GL2 gl = gLDrawable.getGL().getGL2();
 		glClearColor(gl,getBackground());
@@ -151,9 +148,8 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 		
 		
 		
-		int y = gLDrawable.getHeight() - (int)fontSize() - marginV;
+		int y = gLDrawable.getSurfaceHeight() - (int)fontSize() - marginV;
 		
-//		mainRenderer.beginRendering(gLDrawable.getWidth(), gLDrawable.getHeight());
 		mainRenderer.begin3DRendering();
 		
 		mainRenderer.setColor(getForeground());
@@ -165,47 +161,7 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 		drawLine(s2, mainRenderer, gLDrawable, 1,y,null);
 		
 		mainRenderer.end3DRendering();
-//		mainRenderer.endRendering();
-
-		//########
 		
-		if(lines == 3) {
-		
-			gl.glBegin(GL2.GL_QUADS);
-			gl.glColor3f(0.0f, 0.0f,0.0f);
-			gl.glVertex3f(0, 0, 0);
-			gl.glVertex3f(  gLDrawable.getWidth(),0, 0);
-			gl.glVertex3f( gLDrawable.getWidth(),  fontSize(), 0);
-			gl.glVertex3f(0,  fontSize(), 0);
-			gl.glEnd();
-			
-			String s3   = "  S      S      S R    S R           S R                ";
-			
-			String tmpl = "M S R  M S R  M S R  M S R  M S R  M S R  M S R  M S R  ";
-			
-			renderer2.beginRendering(gLDrawable.getWidth(), gLDrawable.getHeight());
-			renderer2.setColor(getBackground().darker());
-			drawLine(tmpl, renderer2, gLDrawable, 2,y,null);
-		
-			
-			drawLine(s3, renderer2, gLDrawable, 2,y,new Handler() {
-				
-				public void drawChar(TextRenderer r, char c) {
-					switch(c){
-					case 'M':
-						r.setColor(Color.cyan);
-						break;
-					case 'R':
-						r.setColor(Color.red);
-						break;
-					case 'S':
-						r.setColor(Color.yellow);
-						break;	
-					}	
-				}
-			});
-			renderer2.endRendering();
-		}
 		gl.glFlush();
 	}
 
@@ -456,13 +412,8 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 		init(true);
 	}
 	private void init(boolean visible) {
-		
 		Rectangle oldBounds = getBounds();
-		
 		mainRenderer = new TextRenderer(new Font(font, Font.BOLD, (int)(fontSize()/scale)),antiAliased,false);
-		renderer2 = new TextRenderer(new Font(font, Font.BOLD, (int)(fontSize()/scale)),antiAliased,false);
-
-		
 		frame = new JFrame(getTitle());
 		frame.add(canvas);
 		
@@ -486,7 +437,7 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 		
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				displayText("Cannot close");
+				displayTextTemporary("Close via context-menu 'Exit'", 1000);
 			}
 		});
 		
@@ -515,17 +466,25 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 	
 	public void displayText(String s){
 		StringBuffer buf = new StringBuffer(s);
-		
-//		if(buf.length()>bytesPerRow*2)
-//			s = s.substring(0,bytesPerRow*2);
-
 		buf.setLength(Math.max(bytesPerRow*2, buf.length()));
-
 		while(buf.length() < bytesPerRow*2)
 			buf.append(" ");
-		
 		s = buf.toString();
 		updateDisplayData(0, s.getBytes(), 0, s.length());
+	}
+	
+	
+	public void displayTextTemporary(String s,long ms){
+		byte[]copy = new byte[displayData.length];
+		System.arraycopy(displayData, 0, copy ,0,displayData.length);
+		displayText(s);
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+			Thread.interrupted();
+		}
+		System.arraycopy(copy, 0, displayData ,0,copy.length);
+		redraw();
 	}
 	
 	
@@ -570,10 +529,8 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 	private void createMenuBar() {
 
 		popup = new JPopupMenu();
-		
 		JMenuItem item = new JMenuItem("Configure");
 		item.addActionListener(new ActionListener() {
-			
 			public void actionPerformed(ActionEvent e) {
 				if(getListener()!=null)
 					getListener().configure(MackieLCDWindow.this);
@@ -582,18 +539,26 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 		popup.add(item);
 		
 		item = new JCheckBoxMenuItem("Always on top");
-		
 		NSCellFactory.create(PlugInFactory.get()).createCellForComponent(item).bind(
 				NSCell.CellValueBinding, this, "alwaysOnTop",
 				new DefaultBindingOptions());
 
+		popup.add(item);
+		
+		item = new JMenuItem("Exit");
+		item.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(getListener()!=null)
+					getListener().exit(MackieLCDWindow.this);
+			}
+		});
 		popup.add(item);
 	}
 
 
 	public void dispose(GLAutoDrawable arg0) {
 		// TODO Auto-generated method stub
-		
+		System.out.println("dispose");
 	}
 	
 	

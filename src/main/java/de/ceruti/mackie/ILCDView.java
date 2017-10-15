@@ -7,6 +7,7 @@ public interface ILCDView {
 
 	public interface Nofitications {
 		void configure(ILCDView jFrameLCDView);
+		void exit(ILCDView jFrameLCDView);
 	}
 	
 	

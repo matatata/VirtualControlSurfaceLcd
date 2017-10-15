@@ -51,7 +51,8 @@ public class SettingsView {
 		JSlider opacitySlider = new JSlider();
 		JSlider spacingSlider = new JSlider();
 		JCheckBox alwaysOnTop = new JCheckBox("Always on top");
-		JCheckBox hideTitleBar = new JCheckBox("Hide titlebar");
+//		JCheckBox hideTitleBar = new JCheckBox("Hide titlebar");
+		
 		JCheckBox smooth = new JCheckBox("Antialias");
 		JComboBox fontSize = new JComboBox();
 		
@@ -69,7 +70,8 @@ public class SettingsView {
 		checkPanel.add(new Label("Font size"));
 		checkPanel.add(fontSize);
 		checkPanel.add(alwaysOnTop);
-		checkPanel.add(hideTitleBar);
+//		checkPanel.add(hideTitleBar);
+		checkPanel.add(new Label());//placeholder
 		checkPanel.add(foregroundButton);
 		checkPanel.add(backgroundButton);
 		
@@ -112,8 +114,8 @@ public class SettingsView {
 		//Bindings:
 		nSCellFactory.createCellForComponent(alwaysOnTop).bind(NSCell.CellValueBinding,
 				controller, "lcdView.alwaysOnTop", new DefaultBindingOptions());
-		nSCellFactory.createCellForComponent(hideTitleBar).bind(NSCell.CellValueBinding,
-				controller, "lcdView.undecorated", new DefaultBindingOptions());
+//		nSCellFactory.createCellForComponent(hideTitleBar).bind(NSCell.CellValueBinding,
+//				controller, "lcdView.undecorated", new DefaultBindingOptions());
 		nSCellFactory.createCellForComponent(smooth).bind(NSCell.CellValueBinding,
 				controller, "lcdView.antialiased", new DefaultBindingOptions());
 		
@@ -121,7 +123,7 @@ public class SettingsView {
 		opacitiySliderCell.setCellValueRange(new Object[]{0.25f,1.0f});
 		opacitiySliderCell.setResolution(100);
 		opacitiySliderCell.bind(NSCell.CellValueBinding, controller, "lcdView.alpha", new DefaultBindingOptions());
-		opacitiySliderCell.bind(NSCell.CellEnabledBinding, controller, "lcdView.undecorated", new DefaultBindingOptions());
+//		opacitiySliderCell.bind(NSCell.CellEnabledBinding, controller, "lcdView.undecorated", new DefaultBindingOptions());
 		
 		
 		
