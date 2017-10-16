@@ -22,7 +22,7 @@ import de.ceruti.midi.core.LCDMidiCentral;
 import de.ceruti.midi.core.MidiDestination;
 import de.ceruti.midi.core.MidiSource;
 
-public class MackieLCDController extends NSObjectImpl implements Nofitications {
+public class VirtualControlSurfaceLCD extends NSObjectImpl implements Nofitications {
 	
 	private static final String BACKGROUND_KEY = "backgroundKey";
 	private static final String FOREGROUND_KEY = "foregroundKey";
@@ -32,11 +32,10 @@ public class MackieLCDController extends NSObjectImpl implements Nofitications {
 	private static final String ANTIALIASED_PREF_KEY = "antialiasedPrefKey";
 	private static final String ALWAYS_ON_TOP_PREF_KEY = "alwaysOnTopPrefKey";
 	private static final String NOPORT = "-";
-	private static final String VirtualPortIN = "MackieLCD in";
-	private static final String VirtualPortOUT = "MackieLCD out";
+	private static final String VirtualPortMappedOut = VirtualControlSurfaceLCD.class.getSimpleName();
+	private static final String VirtualPortReturn = VirtualControlSurfaceLCD.class.getSimpleName();
 	
-	private static IMidiCentral central = 
-		new LCDMidiCentral(VirtualPortIN, VirtualPortOUT);
+	private IMidiCentral central;
 //		new IMidiCentral.Dummy();
 
 	
@@ -150,9 +149,17 @@ public class MackieLCDController extends NSObjectImpl implements Nofitications {
 		this.registrationModel = registrationModel;
 	}
 
-	MackieLCDController(){
+	
+	VirtualControlSurfaceLCD() {
+
+	}
+
+	public void startup() {
 		
-		System.setProperty("apple.laf.useScreenMenuBar", "true");
+		central = 
+				new LCDMidiCentral(VirtualPortMappedOut, VirtualPortReturn);
+		
+		
 		
 		lcdView = new MackieLCDWindow(this,"Mackie View",Color.white,Color.blue,0.75f,null,false);
 		
@@ -168,18 +175,10 @@ public class MackieLCDController extends NSObjectImpl implements Nofitications {
 		};
 		registrationModel = new RegistrationModel();
 		
-		settings = new SettingsView(this);
 		
-		initInsAndOuts();
-
-		loadSettings();
 		
-		if(mackieView.getFromHost() == null /* || mackieView.getToController() == null*/){
-			lcdView.displayText("Welcome! At least, you need to select a \"from host\" to make the display receive data.");
-			settings.show(true);
-		}
 
-		lcdView.show(true);
+		
 		
 		if(!registrationModel.isRegistered()){
 			TimerTask task = new TimerTask() {
@@ -202,8 +201,27 @@ public class MackieLCDController extends NSObjectImpl implements Nofitications {
 			
 			registerTimer.schedule(task, 5000,1000);
 		}
-
 		
+		
+		
+		
+		
+
+		initInsAndOuts();
+		
+		
+		
+		loadSettings();
+		if(mackieView.getFromHost() == null /* || mackieView.getToController() == null*/){
+			lcdView.displayText("Welcome! At least, you need to select a \"from host\" to make the display receive data.");
+			settings.show(true);
+		}
+		
+		
+		settings = new SettingsView(this);
+		
+		lcdView.show(true);
+
 	}
 	
 	
@@ -217,12 +235,15 @@ public class MackieLCDController extends NSObjectImpl implements Nofitications {
 	
 	
 	public static void main(String[] args) {
+		System.out.println("Hello");
+		
 		try{
 		UIManager.setLookAndFeel(UIManager
 				.getSystemLookAndFeelClassName());
 		}catch(Exception e){}
 		
-		final MackieLCDController mackie = new MackieLCDController();
+		final VirtualControlSurfaceLCD mackie = new VirtualControlSurfaceLCD();
+		mackie.startup();
 		
 		
 		
@@ -287,6 +308,10 @@ public class MackieLCDController extends NSObjectImpl implements Nofitications {
 		lcdView.setForeground(new Color(prefs.getInt(FOREGROUND_KEY, Color.white.getRGB())));
 		lcdView.setBackground(new Color(prefs.getInt(BACKGROUND_KEY, Color.blue.getRGB())));
 		
+		
+		
+		getMapper().deserialize(prefs.get("mappings", ""));
+		
 	}
 	
 	@Override
@@ -320,6 +345,9 @@ public class MackieLCDController extends NSObjectImpl implements Nofitications {
 		prefs.putInt(BACKGROUND_KEY, lcdView.getBackground().getRGB());
 		
 		
+		prefs.put("mappings", getMapper().serialize());
+		
+		
 		try {
 			prefs.flush();
 		} catch (BackingStoreException e) {
@@ -327,8 +355,14 @@ public class MackieLCDController extends NSObjectImpl implements Nofitications {
 		}
 	}
 
-	private Preferences getPrefs() {
-		Preferences prefs = Preferences.userRoot().node("de").node("infomac").node("MacBCFView");
+	private static Preferences getPrefs() {
+		Preferences prefs = Preferences
+//				.userRoot()
+//				.userNodeForPackage(getClass());
+//				.systemNodeForPackage(getClass());
+				
+				.userRoot()
+				.node("de").node("infomac").node(VirtualControlSurfaceLCD.class.getSimpleName());
 		return prefs;
 	}
 

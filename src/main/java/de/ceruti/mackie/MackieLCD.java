@@ -19,12 +19,12 @@ public abstract class MackieLCD extends NSObjectImpl {
 
 	private MidiSource fromHost;
 
-	private MackieMapper fromController2HostMapper = new MackieMapper() {
+	private MackieMapper fromController2HostMapper = new MackieMapper() ;//{
 
-		protected MidiDestination midiDestination() {
-			return getToHost();
-		}
-	};
+//		protected MidiDestination midiDestination() {
+//			return getToHost();
+//		}
+//	};
 
 	private MidiDestination toController;
 
@@ -132,6 +132,7 @@ public abstract class MackieLCD extends NSObjectImpl {
 
 	public void setToHost(MidiDestination toHost) {
 		this.toHost = toHost;
+		fromController2HostMapper.setDestination(toHost);
 	}
 
 

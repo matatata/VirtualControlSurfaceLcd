@@ -3,14 +3,17 @@
  */
 package de.ceruti.mackie;
 
+import static de.ceruti.midi.core.MidiNotes.sharedInstance;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+
 import de.ceruti.curcuma.api.keyvaluecoding.KeyValueCoding;
+import de.ceruti.curcuma.api.keyvaluecoding.exceptions.ValidationException;
 import de.ceruti.curcuma.api.keyvalueobserving.KeyValueObserving;
 import de.ceruti.curcuma.foundation.KVOMutableArrayProxy;
 import de.ceruti.curcuma.foundation.NSObjectImpl;
@@ -18,20 +21,37 @@ import de.ceruti.curcuma.keyvaluebinding.KeyValueBindingCreator;
 import de.ceruti.curcuma.keyvaluecoding.DefaultErrorHandling;
 import de.ceruti.curcuma.keyvaluecoding.KeyValueCodeable;
 import de.ceruti.curcuma.keyvalueobserving.KeyValueObservable;
+import de.ceruti.midi.core.MidiDestination;
 import de.ceruti.midi.core.MidiHandlerAdapter;
+import de.ceruti.midi.core.MidiListener;
 
 @KeyValueCodeable
 @DefaultErrorHandling
 @KeyValueObservable
 @KeyValueBindingCreator
 //@NSObject
-public abstract class MackieMapper extends MidiHandlerAdapter {
+public class MackieMapper 
+extends NSObjectImpl
+implements MidiListener{
+	private HH del;
 
-	private Map<Integer, Integer> keyMapper = new HashMap<Integer, Integer>();
+	
+	@Override
+	public void midiReceived(byte[] data) {
+		del.midiReceived(data);
+	}
+
+
+	public void setDestination(MidiDestination destination) {
+		del.setDestination(destination);
+	}
+
+	private String monitor;
 
 	public MackieMapper() {
 		super();
-		readMap();
+		
+		del=new HH();
 	}
 
 
@@ -44,53 +64,102 @@ public abstract class MackieMapper extends MidiHandlerAdapter {
 	}
 	
 
-	protected synchronized ActionCode note(int note, int sel, byte[] data) {
-		if (keyMapper.containsKey(note)) {
-			data[1] = keyMapper.get(note).byteValue();
-			return ActionCode.Mapped;
+	private MappingEntry findMappingEntry(int from){
+		for(MappingEntry e:mappings){
+			if(e.getFrom()==from){
+				return e;
+			}
+		}
+		return null;
+	}
+	
+	protected class HH extends MidiHandlerAdapter {
+
+		private MidiDestination destination;
+
+		public HH() {
+		}
+		
+		@Override
+		protected MidiDestination midiDestination() {
+			return destination;
 		}
 
-		return ActionCode.Thru;
-	}
+		public void setDestination(MidiDestination destination) {
+			this.destination = destination;
+		}
 
+		protected synchronized ActionCode note(int note, int sel, byte[] data) {
+
+			MappingEntry entry = findMappingEntry(note);
+			if (entry != null) {
+				data[1] = (byte) entry.getTo();
+				if (sel == 127)
+					setMonitor(entry.toString() + "(" + sharedInstance().code2Note(entry.getFrom()) + "->"
+							+ sharedInstance().code2Note(entry.getTo()) + ")");
+				return ActionCode.Mapped;
+			}
+
+			if (sel == 127)
+				setMonitor("Received " + sharedInstance().code2Note(note));
+
+			return ActionCode.Thru;
+		}
+	}
+	
+	
 	
 
-	private void readMap() {
-//		keyMapper.put(91, 98);
-//		keyMapper.put(92, 99);
-//		keyMapper.put(93, 96);
-//		keyMapper.put(94, 97);
-//
-//		keyMapper.put(96, 94);
-//		keyMapper.put(97, 93);
-//		keyMapper.put(98, 91);
-//		keyMapper.put(99, 92);
-		
-		insertObjectInMappingsAtIndex(new MappingEntry(91, 98), countOfMappings());
-		insertObjectInMappingsAtIndex(new MappingEntry(92, 99), countOfMappings());
-		insertObjectInMappingsAtIndex(new MappingEntry(93, 96), countOfMappings());
-		insertObjectInMappingsAtIndex(new MappingEntry(94, 97), countOfMappings());
-	
-		insertObjectInMappingsAtIndex(new MappingEntry(96, 94), countOfMappings());
-		insertObjectInMappingsAtIndex(new MappingEntry(97, 93), countOfMappings());
-		insertObjectInMappingsAtIndex(new MappingEntry(98, 91), countOfMappings());
-		insertObjectInMappingsAtIndex(new MappingEntry(99, 92), countOfMappings());
-		
+	public void setMonitor(String title) {
+		this.monitor = title;
 	}
+	
+	public String getMonitor() {
+		return monitor;
+	}
+
+
 	
 	public static class MappingEntry extends NSObjectImpl {
 //		private int 
 		private int from,to;
+		private boolean persist=true;
+		private String name;
 		
 		public MappingEntry(){
-			this(0,0);	
+			this(0,0,true,"Untitled Mapping");	
 		}
 		
-		public MappingEntry(int from,int to){
+		
+		public MappingEntry(int from,int to,boolean persist,String name){
 			this.from=from;
 			this.to=to;
+			this.persist = persist;
+			this.name = name;
 		}
 		
+		public boolean getPersist(){
+			return persist;
+		}
+		
+		public void setPersist(boolean persist) {
+			this.persist = persist;
+		}
+		
+		
+		public void setName(String name) {
+			this.name = name;
+		}
+		
+		public String validateName(String name) throws ValidationException{
+			if(name==null || name.trim().isEmpty())
+				throw new ValidationException("must not be empty");
+			return name.replaceAll("(;|:)","_");
+		}
+		
+		public String getName() {
+			return name;
+		}
 
 		public int getFrom() {
 			return from;
@@ -106,6 +175,18 @@ public abstract class MackieMapper extends MidiHandlerAdapter {
 
 		public void setTo(int to) {
 			this.to = to;
+		}
+		
+		@Override
+		public String toString() {
+			return from + ":" + to + ":" + name;
+		}
+		
+		public static MappingEntry parse(String s){
+			String[] strings = s.split(":");
+			if(strings.length!=3)
+				throw new IllegalArgumentException("cannot parse Midi-Note-Mapping:" + s);
+			return new MappingEntry(Integer.valueOf(strings[0]),Integer.valueOf(strings[1]),true,strings[2]);
 		}
 	}
 	
@@ -125,18 +206,37 @@ public abstract class MackieMapper extends MidiHandlerAdapter {
 	
 	//Object removeObjectFrom<Key>AtIndex(int)
 	*/
+	
+	
+	public String serialize(){
+		return StringUtils.join(mappings, ";");
+	}
+	
+	public void deserialize(String mappingString){
+		List<MappingEntry> result=new ArrayList<MappingEntry>();
+		if(mappingString==null||mappingString.isEmpty())
+			return;
+		for (String s : mappingString.split(";")) {
+			try{
+			result.add(MappingEntry.parse(s));
+			
+			}catch(IllegalArgumentException e){
+				System.err.println(e.getMessage());
+			}
+		}
+		
+		mutableArrayValueForKey("mappings").addAll(result);
+	
+	}
 
 	public synchronized void insertObjectInMappingsAtIndex(Object obj,int i){
 		mappings.add(i, (MappingEntry) obj);
-		keyMapper.put(((MappingEntry) obj).getFrom(),((MappingEntry) obj).getTo());
 	}
 	
 	////Object removeObjectFrom<Key>AtIndex(int)
 	
 	public synchronized Object removeObjectFromMappingsAtIndex(int i) {
 		MappingEntry e = mappings.remove(i);
-		if(e!=null)
-			keyMapper.remove(e.getFrom());
 		
 		return e;
 	}

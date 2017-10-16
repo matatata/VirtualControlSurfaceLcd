@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>org.jogamp.jogl</groupId>
 			<artifactId>jogl-all-main</artifactId>
-			<!-- <version>2.0.2</version>-->
+			<!-- <version>2.0.2</version> -->
 			<version>2.3.2</version>
 		</dependency>
 
@@ -55,34 +55,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>aspectj-maven-plugin</artifactId>
-				<configuration>
-					<aspectLibraries>
-						<aspectLibrary>
-							<groupId>curcuma</groupId>
-							<artifactId>CurcumaKeyValueCoding</artifactId>
-						</aspectLibrary>
-						<aspectLibrary>
-							<groupId>curcuma</groupId>
-							<artifactId>CurcumaKeyValueObserving</artifactId>
-						</aspectLibrary>
-						<aspectLibrary>
-							<groupId>curcuma</groupId>
-							<artifactId>CurcumaKeyValueBinding</artifactId>
-						</aspectLibrary>
-						<aspectLibrary>
-							<groupId>curcuma</groupId>
-							<artifactId>CurcumaFoundation</artifactId>
-						</aspectLibrary>
-						<aspectLibrary>
-							<groupId>curcuma</groupId>
-							<artifactId>CurcumaAppKit</artifactId>
-						</aspectLibrary>
-					</aspectLibraries>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>aspectj-maven-plugin</artifactId>
@@ -114,6 +86,71 @@
 						<version>${aspectj.version}</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>aspectj-maven-plugin</artifactId>
+				<configuration>
+					<aspectLibraries>
+						<aspectLibrary>
+							<groupId>curcuma</groupId>
+							<artifactId>CurcumaKeyValueCoding</artifactId>
+						</aspectLibrary>
+						<aspectLibrary>
+							<groupId>curcuma</groupId>
+							<artifactId>CurcumaKeyValueObserving</artifactId>
+						</aspectLibrary>
+						<aspectLibrary>
+							<groupId>curcuma</groupId>
+							<artifactId>CurcumaKeyValueBinding</artifactId>
+						</aspectLibrary>
+						<aspectLibrary>
+							<groupId>curcuma</groupId>
+							<artifactId>CurcumaFoundation</artifactId>
+						</aspectLibrary>
+						<aspectLibrary>
+							<groupId>curcuma</groupId>
+							<artifactId>CurcumaAppKit</artifactId>
+						</aspectLibrary>
+					</aspectLibraries>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>sh.tak.appbundler</groupId>
+				<artifactId>appbundle-maven-plugin</artifactId>
+				<version>1.2.0</version>
+				<configuration>
+					<mainClass>de.ceruti.mackie.VirtualControlSurfaceLCD</mainClass>
+					<!-- <mainClass>de.ceruti.mackie.view.Stickie</mainClass> -->
+					<!-- For example <jrePath>/foo/bar/jre1.8.0_112.jre</jrePath> -->
+					<!-- <jrePath>${jre-folder}</jrePath> -->
+					<generateDiskImageFile>false</generateDiskImageFile>
+
+					<additionalBundledClasspathResources>
+						<fileSet>
+							<directory>${basedir}/lib</directory>
+							<includes>
+								<include>libmmj.jnilib</include>
+								<include>mmj.jar</include>
+							</includes>
+						</fileSet>
+					</additionalBundledClasspathResources>
+					<jvmOptions>
+						<jvmOption>-Djava.library.path=$APP_ROOT/Contents/Java/lib/</jvmOption>
+						<jvmOption>-Dapple.laf.useScreenMenuBar=false</jvmOption>
+						<jvmOption>-Dcom.apple.macos.useScreenMenuBar=false</jvmOption>
+					</jvmOptions>
+					<bundleName>VirtualControlSurfaceLCD</bundleName>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>bundle</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 		</plugins>

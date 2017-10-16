@@ -31,14 +31,14 @@ import de.ceruti.curcuma.appkit.widgets.swing.NSCellFactory;
 import de.ceruti.curcuma.appkit.widgets.swing.PlugInFactory;
 import de.ceruti.curcuma.appkit.widgets.swing.Utils;
 import de.ceruti.curcuma.keyvaluebinding.DefaultBindingOptions;
-import de.ceruti.mackie.MackieLCDController;
+import de.ceruti.mackie.VirtualControlSurfaceLCD;
 
 public class SettingsView {
 	private JFrame frame;
-	
+	private MappingWindow mWin;
 	NSCellFactory nSCellFactory = NSCellFactory.create(PlugInFactory.get());
 	
-	public SettingsView(final MackieLCDController controller) {
+	public SettingsView(final VirtualControlSurfaceLCD controller) {
 		frame = new JFrame("MackieLCDView");
 		JTabbedPane tabPane = new JTabbedPane();
 		
@@ -161,18 +161,20 @@ public class SettingsView {
 		frame.setVisible(false);
 	}
 
-	private void initMidiTab(JPanel midiTab,final MackieLCDController controller) {
+	private void initMidiTab(JPanel midiTab,final VirtualControlSurfaceLCD controller) {
 		JPanel tt=new JPanel(new GridLayout(1,3));
-		tt.setBorder(BorderFactory.createTitledBorder("from controller via mapper to host (optional)"));
+		tt.setBorder(BorderFactory.createTitledBorder("from Controller via Note-Mapping to DAW (optional)"));
 		JComboBox box1 = new JComboBox();
 		JComboBox box2 = new JComboBox();
 		tt.add(box1);
-		JButton mapbutt = new JButton("Edit Key-Mappings");
+		JButton mapbutt = new JButton("Edit Note-Mappings");
+		
+		mWin=new MappingWindow(controller.getMapper());
+		mWin.show(false);
+		
 		mapbutt.addActionListener(new ActionListener() {
-			MappingWindow mWin = null;
+			
 			public void actionPerformed(ActionEvent e) {
-				if(mWin==null)
-					mWin = new MappingWindow(controller.getMapper());
 				
 				mWin.show(true);
 			}
@@ -185,14 +187,13 @@ public class SettingsView {
 		cell1.bind(NSComboCell.CellValueBinding, controller, "fromControllerPortName", new DefaultBindingOptions());
 		cell1.bind(NSComboCell.ContentBinding, controller, "ins", new DefaultBindingOptions());
 		
-		
 		cell1 = nSCellFactory.createCellForComponent(box2);
 		cell1.bind(NSComboCell.CellValueBinding, controller, "toHostPortName", new DefaultBindingOptions());
 		cell1.bind(NSComboCell.ContentBinding, controller, "outs", new DefaultBindingOptions());
 		
 		
 		tt=new JPanel(new GridLayout(1,2));
-		tt.setBorder(BorderFactory.createTitledBorder("from host via display to controller (required)"));
+		tt.setBorder(BorderFactory.createTitledBorder("from DAW via " + VirtualControlSurfaceLCD.class.getSimpleName() + " to Controller (required)"));
 		JComboBox box3 = new JComboBox();
 		JComboBox box4 = new JComboBox();
 		tt.add(box3);
@@ -213,7 +214,7 @@ public class SettingsView {
 		frame.setVisible(b);
 	}
 
-	public void register(final MackieLCDController controller) {
+	public void register(final VirtualControlSurfaceLCD controller) {
 		boolean valid = controller.getRegistrationModel().isRegistered();
 		
 		if(valid)
