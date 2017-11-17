@@ -39,7 +39,7 @@ public class SettingsView {
 	NSCellFactory nSCellFactory = NSCellFactory.create(PlugInFactory.get());
 	
 	public SettingsView(final VirtualControlSurfaceLCD controller) {
-		frame = new JFrame("MackieLCDView");
+		frame = new JFrame(VirtualControlSurfaceLCD.class.getSimpleName());
 		JTabbedPane tabPane = new JTabbedPane();
 		
 		

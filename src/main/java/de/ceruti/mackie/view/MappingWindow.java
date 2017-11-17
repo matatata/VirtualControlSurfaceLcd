@@ -41,8 +41,8 @@ import de.ceruti.curcuma.appkit.widgets.swing.PlugInFactory;
 import de.ceruti.curcuma.appkit.widgets.swing.SwingComboBoxWidgetPlugIn;
 import de.ceruti.curcuma.appkit.widgets.swing.SwingTableViewPlugIn;
 import de.ceruti.curcuma.keyvaluebinding.DefaultBindingOptions;
-import de.ceruti.mackie.MackieMapper;
-import de.ceruti.mackie.MackieMapper.MappingEntry;
+import de.ceruti.mackie.MidiMapper;
+import de.ceruti.mackie.MidiMapper.MappingEntry;
 import de.ceruti.midi.core.MidiNotes;
 
 
@@ -53,7 +53,7 @@ public class MappingWindow {
 	private JTable table;
 	
 	
-	public MappingWindow(final MackieMapper mapper) {
+	public MappingWindow(final MidiMapper mapper) {
 		frame=new JFrame("Key Mappings");
 		table=new JTable();
 		nsTable=new NSTable();
@@ -74,7 +74,7 @@ public class MappingWindow {
 		NSCellFactory nsCellFactory=NSCellFactory.create(PlugInFactory.get());
 		
 		final NSArrayControllerImpl arrayController=new NSArrayControllerImpl();
-		arrayController.setObjectClass(MackieMapper.MappingEntry.class);
+		arrayController.setObjectClass(MidiMapper.MappingEntry.class);
 		arrayController.setContent(mapper.mutableArrayValueForKey("mappings"));
 		
 		NSTableCol fromCol = new NSTableCol();

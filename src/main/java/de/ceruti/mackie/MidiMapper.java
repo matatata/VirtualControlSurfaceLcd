@@ -29,8 +29,7 @@ import de.ceruti.midi.core.MidiListener;
 @DefaultErrorHandling
 @KeyValueObservable
 @KeyValueBindingCreator
-//@NSObject
-public class MackieMapper 
+public class MidiMapper 
 extends NSObjectImpl
 implements MidiListener{
 	private HH del;
@@ -48,7 +47,7 @@ implements MidiListener{
 
 	private String monitor;
 
-	public MackieMapper() {
+	public MidiMapper() {
 		super();
 		
 		del=new HH();

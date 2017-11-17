@@ -15,7 +15,7 @@ import javax.swing.UIManager;
 import de.ceruti.curcuma.foundation.NSObjectImpl;
 import de.ceruti.curcuma.keyvalueobserving.PostKVONotifications;
 import de.ceruti.mackie.ILCDView.Nofitications;
-import de.ceruti.mackie.view.MackieLCDWindow;
+import de.ceruti.mackie.view.VirtualLCDWindow;
 import de.ceruti.mackie.view.SettingsView;
 import de.ceruti.midi.core.IMidiCentral;
 import de.ceruti.midi.core.LCDMidiCentral;
@@ -161,7 +161,7 @@ public class VirtualControlSurfaceLCD extends NSObjectImpl implements Nofiticati
 		
 		
 		
-		lcdView = new MackieLCDWindow(this,"Mackie View",Color.white,Color.blue,0.75f,null,false);
+		lcdView = new VirtualLCDWindow(this,"Mackie View",Color.white,Color.blue,0.75f,null,false);
 		
 
 		mackieView = new MackieLCD(){
@@ -271,7 +271,7 @@ public class VirtualControlSurfaceLCD extends NSObjectImpl implements Nofiticati
 	}
 
 
-	public MackieMapper getMapper() {
+	public MidiMapper getMapper() {
 		return mackieView.getMapper();
 	}
 	

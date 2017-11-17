@@ -36,7 +36,7 @@ import de.ceruti.curcuma.keyvalueobserving.PostKVONotifications;
 import de.ceruti.mackie.ILCDView;
 import de.ceruti.mackie.MackieLCD;
 
-public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, ILCDView {
+public class VirtualLCDWindow extends NSObjectImpl implements GLEventListener, ILCDView {
 	
 	private GLCanvas canvas = new GLCanvas(new GLCapabilities(GLProfile.get(GLProfile.GL2)));
 	private GLU glu = new GLU();
@@ -313,7 +313,7 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 	private final byte[] displayData = new byte[rows * bytesPerRow];
 	
 	
-	public MackieLCDWindow(Nofitications listener,String title,Color fg,Color bg, float alpha,Rectangle bounds, boolean onTop) {
+	public VirtualLCDWindow(Nofitications listener,String title,Color fg,Color bg, float alpha,Rectangle bounds, boolean onTop) {
 		this.alpha=alpha;
 		this.title=title;
 		this.background=bg;
@@ -332,7 +332,7 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 			public void mouseClicked(MouseEvent arg0) {
 				super.mouseClicked(arg0);
 				if(arg0.getClickCount()>1 && getListener()!=null){
-					getListener().configure(MackieLCDWindow.this);
+					getListener().configure(VirtualLCDWindow.this);
 				}
 			}
 		});
@@ -475,7 +475,7 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(getListener()!=null)
-					getListener().configure(MackieLCDWindow.this);
+					getListener().configure(VirtualLCDWindow.this);
 			}
 		});
 		popup.add(item);
@@ -491,7 +491,7 @@ public class MackieLCDWindow extends NSObjectImpl implements GLEventListener, IL
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(getListener()!=null)
-					getListener().exit(MackieLCDWindow.this);
+					getListener().exit(VirtualLCDWindow.this);
 			}
 		});
 		popup.add(item);
