@@ -210,6 +210,7 @@ public class VirtualControlSurfaceLCD extends NSObjectImpl implements Nofiticati
 		initInsAndOuts();
 		
 		
+		settings = new SettingsView(this);
 		
 		loadSettings();
 		if(mackieView.getFromHost() == null /* || mackieView.getToController() == null*/){
@@ -218,7 +219,6 @@ public class VirtualControlSurfaceLCD extends NSObjectImpl implements Nofiticati
 		}
 		
 		
-		settings = new SettingsView(this);
 		
 		lcdView.show(true);
 
