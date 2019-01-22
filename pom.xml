@@ -5,10 +5,10 @@
 	<artifactId>virtualcontrolsurfacelcd</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<properties>
-		<aspectj.version>1.8.10</aspectj.version>
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
-		<java.source-target.version>1.6</java.source-target.version>
+		<aspectj.version>1.9.2</aspectj.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<java.source-target.version>1.8</java.source-target.version>
 	</properties>
 
 	<dependencies>
@@ -58,7 +58,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>aspectj-maven-plugin</artifactId>
-				<version>1.9</version>
+				<version>1.11</version>
 				<configuration>
 					<!-- <showWeaveInfo>true</showWeaveInfo> -->
 					<source>${java.source-target.version}</source>
